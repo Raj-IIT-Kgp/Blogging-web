@@ -24,6 +24,17 @@ userRouter.post('/signup', async (c) => {
         datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate())
 
+    const user = await prisma.user.findFirst({
+        where: {
+            username: body.username,
+        }
+    })
+    if(user){
+        c.json({
+            message : 'you have already an account'
+        })
+    }
+
     try {
         const user = await prisma.user.create({
             data: {
@@ -74,7 +85,7 @@ userRouter.post('/signin', async (c) => {
         if (!user) {
             c.status(403);
             return c.json({
-                message: "Incorrect creds"
+                message: "Invalid credential"
             })
         }
         const jwt = await sign({
